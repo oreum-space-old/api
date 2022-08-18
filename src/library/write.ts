@@ -1,0 +1,1 @@
+export default process.stdout.write.bind(process.stdout)

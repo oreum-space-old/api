@@ -1,0 +1,4 @@
+/.cert/
+/src/env.ts
+/node_modules/
+/dist/
