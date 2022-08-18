@@ -8,12 +8,12 @@ process.timestamp = Date.now()
 
 const
   app = express(),
-  { origin } = env;
+  { applicationUrl } = env;
 
 app
   .use(express.json())
   .use(cookieParser())
-  .use(cors({ credentials: true, origin }))
+  .use(cors({ credentials: true, origin: applicationUrl }))
   // .use('/api', router)
   // .use(errorMiddleware)
 
