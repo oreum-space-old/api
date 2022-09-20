@@ -1,7 +1,8 @@
 import write from '../library/write'
 import escape from '../library/escape'
+import ssh from './ssh'
 
-type Command = {
+export type Command = {
   name: string,
   description?: string,
   examples?: Array<string>,
@@ -11,6 +12,7 @@ type Command = {
 const white = (_: string) => escape.color(escape.Color.brightWhite, _)
 
 const list = {
+  ssh,
   clear: {
     name: 'clear',
     description: 'Clears screen',

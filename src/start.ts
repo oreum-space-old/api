@@ -1,18 +1,28 @@
-import fs from 'fs'
+import fs, { read } from 'fs'
 import * as https from 'https'
 import mongoose, { ConnectOptions } from 'mongoose'
+import discordStart from './discord'
 import escape from './library/escape'
 import write from './library/write'
 import prompt from './prompt'
 import env from './env'
+import startWebSockets from './socket/start'
 
 const
   options = {
     key: fs.readFileSync('.cert/key.pem'),
     cert: fs.readFileSync('.cert/cert.pem')
   } as const,
-  { databaseUrl, port, network: { local, networks }} = env,
+  {
+    databaseUrl,
+    port,
+    network: {
+      local,
+      networks
+    }
+  } = env,
   mongooseConnectOptions = {
+    connectTimeoutMS: 5000,
     useNewUrlParser: true,
     useUnifiedTopology: true
   } as Readonly<ConnectOptions>,
@@ -45,15 +55,25 @@ function serverMounted () {
   prompt(buffer)
 }
 
-export default function () {
+export default function start () {
   console.clear()
+  write(`Connecting to ${escape.color(escape.Color.brightBlack, databaseUrl)} database...`)
   mongoose.connect(databaseUrl, mongooseConnectOptions)
     .then(() => {
-      https
-        .createServer(options)
-        .listen(port, serverMounted)
+      console.clear()
+      const server = https.createServer(options)
+      startWebSockets(server)
+      server.listen(port, serverMounted)
+      discordStart()
     })
     .catch(() => {
+      console.clear()
       write(escape.color(escape.Color.red, `Failed to connect to database\n  ➜  Address: ${databaseUrl}\n`))
+      write('Press enter to retry...')
+      read(0, {
+        length: 1
+      }, (): void => {
+        start()
+      })
     })
 }
